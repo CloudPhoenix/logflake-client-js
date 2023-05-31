@@ -1,0 +1,10 @@
+{
+  "name": "@logflake/client",
+  "version": "0.0.1",
+  "main": "index.js",
+  "repository": "https://github.com/cloudPhoenix/logflake-client-js",
+  "dependencies": {
+    "isomorphic-fetch": "^3.0.0",
+    "os-browserify": "^0.3.0"
+  }
+}
