@@ -6,5 +6,9 @@
   "dependencies": {
     "isomorphic-fetch": "^3.0.0",
     "os-browserify": "^0.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.3.1",
+    "typescript": "^5.1.3"
   }
 }
