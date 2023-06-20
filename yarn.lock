@@ -2,6 +2,11 @@
 # yarn lockfile v1
 
 
+"@types/isomorphic-fetch@^0.0.36":
+  "integrity" "sha512-ulw4d+vW1HKn4oErSmNN2HYEcHGq0N1C5exlrMM0CRqX1UUpFhGb5lwiom5j9KN3LBJJDLRmYIZz1ghm7FIzZw=="
+  "resolved" "https://registry.npmjs.org/@types/isomorphic-fetch/-/isomorphic-fetch-0.0.36.tgz"
+  "version" "0.0.36"
+
 "@types/node@^20.3.1":
   "integrity" "sha512-EhcH/wvidPy1WeML3TtYFGR83UzjxeWRen9V402T8aUGYsCHOmfoisV3ZSg03gAFIbLq8TnWOJ0f4cALtnSEUg=="
   "resolved" "https://registry.npmjs.org/@types/node/-/node-20.3.1.tgz"
