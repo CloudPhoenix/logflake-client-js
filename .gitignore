@@ -2,8 +2,7 @@
 .env
 
 # Dependency directory
-node_modules
-bower_components
+node_modules/
 
 # Editors
 .idea
@@ -13,5 +12,6 @@ bower_components
 .DS_Store
 Thumbs.db
 
-# Ignore built ts files
-dist/**/*
+# Ignore type files and transpiled
+lib/**/*.d.ts
+dist/
