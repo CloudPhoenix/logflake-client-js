@@ -1,19 +1,27 @@
+import 'whatwg-fetch';
+//@ts-ignore
 import os from "os-browserify";
-import fetch from "isomorphic-fetch";
 
 class LogFlake {
-  private LogFlakeServer: string;
-  private LogFlakeAppId: string | null;
-  private LogFlakeHostname: string | null;
+  private server: string;
+  private appId: string | null;
+  private hostname: string | null;
 
-  constructor(server: string = "https://app-test.logflake.io") {
-    this.LogFlakeServer = server;
-    this.LogFlakeAppId = null;
-    this.LogFlakeHostname = null;
+  constructor(
+    appid: string,
+    hostname: string | null = null,
+    server: string | null = null
+  ) {
+    if (appid === null || appid.length === 0) {
+      throw new Error("App ID must not be empty");
+    }
+    this.appId = appid;
+    this.server = server || "https://app-test.logflake.io";
+    this.hostname = hostname || os.hostname() || null;
   }
 
   private async post(queue: string, bodyObject: any) {
-    if (this.LogFlakeAppId === null) {
+    if (this.appId === null) {
       throw new Error("App ID must not be empty. Call Setup first.");
     }
 
@@ -21,7 +29,7 @@ class LogFlake {
     for (let i = 0; i < retries; i++) {
       try {
         await fetch(
-          `${this.LogFlakeServer}/api/ingestion/${this.LogFlakeAppId}/${queue}`,
+          `${this.server}/api/ingestion/${this.appId}/${queue}`,
           {
             method: "POST",
             headers: {
@@ -39,61 +47,54 @@ class LogFlake {
     }
   }
 
-  public setup(
-    appid: string,
-    server: string | null = null,
-    hostname: string | null = null
-  ) {
-    if (appid === null || appid.length === 0) {
-      throw new Error("App ID must not be empty");
-    }
-    this.LogFlakeAppId = appid;
-    if (server !== null) {
-      this.LogFlakeServer = server;
-    }
-    this.LogFlakeHostname = hostname || os.hostname() || null;
-  }
-
-  public sendLog(
+  public async sendLog(
     level: number,
     content: string,
     correlation: string | null = null,
     params: object | undefined = {}
   ) {
-    this.post("logs", {
+    return this.post("logs", {
       correlation,
       params,
       level,
       content,
-      hostname: this.LogFlakeHostname,
+      hostname: this.hostname,
     });
   }
 
-  public sendException(exception: Error, correlation: string | null = null) {
-    this.post("logs", {
+  public async sendException(
+    exception: Error,
+    correlation: string | null = null
+  ) {
+    return this.post("logs", {
       correlation,
       content: exception.stack,
-      hostname: this.LogFlakeHostname,
+      hostname: this.hostname,
       level: LogFlake.LogLevels.EXCEPTION,
     });
   }
 
-  public sendPerformance(label: string, duration: number | null = null) {
+  public async sendPerformance(
+    label: string,
+    duration: number | null = null
+  ) {
     if (label === null || duration === null) {
       throw new Error("Label and duration must not be empty");
     }
-    this.post("perf", { label, duration });
+    return this.post("perf", { label, duration });
   }
 
-  public measurePerformance(label: string) {
+  public measurePerformance(
+    label: string
+  ) {
     if (label === null) {
       throw new Error("Label must not be empty");
     }
     const startTime = new Date();
     return {
-      stop: () => {
+      stop: async () => {
         const duration = new Date().getTime() - startTime.getTime();
-        this.sendPerformance(label, duration);
+        await this.sendPerformance(label, duration);
         return duration;
       },
     };
