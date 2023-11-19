@@ -1,4 +1,6 @@
 import 'whatwg-fetch';
+import brotliPromise from 'brotli-wasm'
+import { Buffer } from 'buffer'
 //@ts-ignore
 import os from "os-browserify";
 
@@ -6,11 +8,13 @@ class LogFlake {
   private server: string;
   private appId: string | null;
   private hostname: string | null;
+  private enableCompression: boolean;
 
   constructor(
     appid: string,
     hostname: string | null = null,
-    server: string | null = null
+    server: string | null = null,
+    enableCompression: boolean = true,
   ) {
     if (appid === null || appid.length === 0) {
       throw new Error("App ID must not be empty");
@@ -18,6 +22,17 @@ class LogFlake {
     this.appId = appid;
     this.server = server || "https://app.logflake.io";
     this.hostname = hostname || os.hostname() || null;
+    this.enableCompression = enableCompression;
+  }
+
+  private btoa(data: string): string {
+    return typeof process !== 'undefined' && process.versions.node
+      ? global.btoa || require('btoa')
+      : globalThis.btoa
+  }
+
+  private dataToBase64(data: any): string {
+    return this.btoa(String.fromCharCode(...data))
   }
 
   private async post(queue: string, bodyObject: any) {
@@ -25,20 +40,30 @@ class LogFlake {
       throw new Error("App ID must not be empty. Call Setup first.");
     }
 
+    const fetchOptions: any = {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      keepalive: true,
+      body: JSON.stringify(bodyObject)
+    };
+
+    if (this.enableCompression) {
+      const brotli = await brotliPromise;
+      const encoded = this.dataToBase64(Buffer.from(fetchOptions.body.toString()))
+      const compressed = brotli.compress(Buffer.from(encoded))
+      fetchOptions.body = compressed
+      fetchOptions.headers['Content-Type'] = 'application/octet-stream'
+    }
+
     const retries = 3;
     for (let i = 0; i < retries; i++) {
       try {
         await fetch(
           `${this.server}/api/ingestion/${this.appId}/${queue}`,
-          {
-            method: "POST",
-            headers: {
-              Accept: "application/json",
-              "Content-Type": "application/json",
-            },
-            keepalive: true,
-            body: JSON.stringify(bodyObject),
-          }
+          fetchOptions
         );
         break;
       } catch (err) {
