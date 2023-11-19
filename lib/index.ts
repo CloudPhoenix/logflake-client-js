@@ -16,7 +16,7 @@ class LogFlake {
       throw new Error("App ID must not be empty");
     }
     this.appId = appid;
-    this.server = server || "https://app-test.logflake.io";
+    this.server = server || "https://app.logflake.io";
     this.hostname = hostname || os.hostname() || null;
   }
 
