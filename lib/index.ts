@@ -26,9 +26,9 @@ class LogFlake {
   }
 
   private btoa(data: string): string {
-    return typeof process !== 'undefined' && process.versions.node
+    return (typeof process !== 'undefined' && process.versions.node
       ? global.btoa || require('btoa')
-      : globalThis.btoa
+      : globalThis.btoa)(data)
   }
 
   private dataToBase64(data: any): string {
