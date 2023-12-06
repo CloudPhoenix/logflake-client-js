@@ -1,6 +1,6 @@
 {
   "name": "@logflake/client",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "repository": "https://github.com/cloudPhoenix/logflake-client-js",
   "main": "dist/index.js",
   "tpes": "dist/index.d.js",
