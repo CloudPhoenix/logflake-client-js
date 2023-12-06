@@ -1,15 +1,27 @@
 {
   "name": "@logflake/client",
   "version": "0.2.2",
+  "description": "",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/esm/index.d.ts",
   "repository": "https://github.com/cloudPhoenix/logflake-client-js",
-  "main": "dist/index.js",
-  "tpes": "dist/index.d.js",
-  "files": [
-    "/dist"
-  ],
   "scripts": {
-    "build": "tsc"
+    "build": "yarn build:esm && yarn build:cjs",
+    "build:esm": "tsc",
+    "build:cjs": "tsc --module commonjs --outDir dist/cjs",
+    "prepare": "npm run build",
+    "lint": "eslint \"{**/*,*}.{js,ts}\"",
+    "prettier": "prettier --write \"{lib,tests,example/src}/**/*.{js,ts}\"",
+    "prepublishOnly": "npm run prettier && npm run lint"
   },
+  "author": "Cloud Phoenix",
+  "license": "MIT",
+  "files": [
+    "dist",
+    "LICENSE",
+    "README.md"
+  ],
   "dependencies": {
     "brotli-wasm": "^2.0.1",
     "buffer": "^6.0.3",
@@ -18,6 +30,12 @@
   },
   "devDependencies": {
     "@types/node": "20.10.3",
+    "@typescript-eslint/eslint-plugin": "^6.13.2",
+    "@typescript-eslint/parser": "^6.13.2",
+    "eslint": "^8.55.0",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.0.1",
+    "prettier": "^3.1.0",
     "typescript": "5.3.2"
   },
   "publishConfig": {
