@@ -20,12 +20,8 @@ class LogFlake {
     this.enableCompression = enableCompression
   }
 
-  private btoa(data: string): string {
-    return (typeof process !== "undefined" && process.versions.node ? global.btoa || require("btoa") : globalThis.btoa)(data)
-  }
-
   private dataToBase64(data: any): string {
-    return this.btoa(String.fromCharCode(...data))
+    return Buffer.from(String.fromCharCode(...data)).toString("base64")
   }
 
   private async post(queue: string, bodyObject: any) {
@@ -46,8 +42,7 @@ class LogFlake {
     if (this.enableCompression) {
       const brotli = await brotliPromise
       const encoded = this.dataToBase64(Buffer.from(fetchOptions.body.toString()))
-      const compressed = brotli.compress(Buffer.from(encoded))
-      fetchOptions.body = compressed
+      fetchOptions.body = brotli.compress(Buffer.from(encoded))
       fetchOptions.headers["Content-Type"] = "application/octet-stream"
     }
 
