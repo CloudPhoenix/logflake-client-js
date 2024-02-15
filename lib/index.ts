@@ -1,4 +1,5 @@
 import "whatwg-fetch"
+import { Buffer } from "buffer"
 //@ts-ignore
 import * as SnappyJS from "snappyjs"
 //@ts-ignore
@@ -35,6 +36,10 @@ export class LogFlake {
     this.enableCompression = enableCompression
   }
 
+  private dataToBase64(data: any): string {
+    return Buffer.from(String.fromCharCode(...data)).toString("base64")
+  }
+
   private async post(queue: string, bodyObject: any) {
     if (this.appId === null) {
       throw new Error("App ID must not be empty. Call Setup first.")
@@ -51,7 +56,8 @@ export class LogFlake {
     }
 
     if (this.enableCompression) {
-      fetchOptions.body = SnappyJS.compress(new TextEncoder().encode(fetchOptions.body.toString()).buffer)
+      const encoded = this.dataToBase64(fetchOptions.body)
+      fetchOptions.body = SnappyJS.compress(new TextEncoder().encode(encoded).buffer)
       fetchOptions.headers["Content-Type"] = "application/octet-stream"
     }
 
