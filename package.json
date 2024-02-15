@@ -1,6 +1,6 @@
 {
   "name": "@logflake/client",
-  "version": "0.2.4",
+  "version": "0.3.0",
   "description": "",
   "main": "./dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -23,9 +23,8 @@
     "README.md"
   ],
   "dependencies": {
-    "brotli-wasm": "^2.0.1",
-    "buffer": "^6.0.3",
     "os-browserify": "^0.3.0",
+    "snappyjs": "^0.7.0",
     "whatwg-fetch": "3.6.19"
   },
   "devDependencies": {

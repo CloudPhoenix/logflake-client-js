@@ -1,10 +1,25 @@
 import "whatwg-fetch"
-import brotliPromise from "brotli-wasm"
-import { Buffer } from "buffer"
 //@ts-ignore
-import os from "os-browserify"
+import * as SnappyJS from "snappyjs"
+//@ts-ignore
+import * as os from "os-browserify"
 
-class LogFlake {
+export let Logger: LogFlake
+
+export function Setup(appid: string, hostname: string | null = null, server: string | null = null, enableCompression: boolean = true) {
+  Logger = new LogFlake(appid, hostname, server, enableCompression)
+}
+
+export const LogLevels = {
+  DEBUG: 0,
+  INFO: 1,
+  WARNING: 2,
+  ERROR: 3,
+  FATAL: 4,
+  EXCEPTION: 5,
+}
+
+export class LogFlake {
   private server: string
   private appId: string | null
   private hostname: string | null
@@ -18,10 +33,6 @@ class LogFlake {
     this.server = server || "https://app.logflake.io"
     this.hostname = hostname || os.hostname() || null
     this.enableCompression = enableCompression
-  }
-
-  private dataToBase64(data: any): string {
-    return Buffer.from(String.fromCharCode(...data)).toString("base64")
   }
 
   private async post(queue: string, bodyObject: any) {
@@ -40,17 +51,14 @@ class LogFlake {
     }
 
     if (this.enableCompression) {
-      const brotli = await brotliPromise
-      const encoded = this.dataToBase64(Buffer.from(fetchOptions.body.toString()))
-      fetchOptions.body = brotli.compress(Buffer.from(encoded))
+      fetchOptions.body = SnappyJS.compress(new TextEncoder().encode(fetchOptions.body.toString()).buffer)
       fetchOptions.headers["Content-Type"] = "application/octet-stream"
     }
 
     const retries = 3
     for (let i = 0; i < retries; i++) {
       try {
-        await fetch(`${this.server}/api/ingestion/${this.appId}/${queue}`, fetchOptions)
-        break
+        return await fetch(`${this.server}/api/ingestion/${this.appId}/${queue}`, fetchOptions)
       } catch (err) {
         console.error(`LogFlake Error (retry ${i + 1}/${retries}):`, err)
       }
@@ -72,7 +80,7 @@ class LogFlake {
       correlation,
       content: exception.stack,
       hostname: this.hostname,
-      level: LogFlake.LogLevels.EXCEPTION,
+      level: LogLevels.EXCEPTION,
     })
   }
 
@@ -96,15 +104,4 @@ class LogFlake {
       },
     }
   }
-
-  public static readonly LogLevels = {
-    DEBUG: 0,
-    INFO: 1,
-    WARNING: 2,
-    ERROR: 3,
-    FATAL: 4,
-    EXCEPTION: 5,
-  }
 }
-
-export default LogFlake
