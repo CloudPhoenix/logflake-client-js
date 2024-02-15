@@ -21,10 +21,10 @@ export const LogLevels = {
 }
 
 export class LogFlake {
-  private server: string
-  private appId: string | null
-  private hostname: string | null
-  private enableCompression: boolean
+  private readonly server: string
+  private readonly appId: string | null
+  private readonly hostname: string | null
+  private readonly enableCompression: boolean
 
   constructor(appid: string, hostname: string | null = null, server: string | null = null, enableCompression: boolean = true) {
     if (appid === null || appid.length === 0) {
@@ -34,10 +34,6 @@ export class LogFlake {
     this.server = server || "https://app.logflake.io"
     this.hostname = hostname || os.hostname() || null
     this.enableCompression = enableCompression
-  }
-
-  private dataToBase64(data: any): string {
-    return Buffer.from(String.fromCharCode(...data)).toString("base64")
   }
 
   private async post(queue: string, bodyObject: any) {
@@ -56,8 +52,9 @@ export class LogFlake {
     }
 
     if (this.enableCompression) {
-      const encoded = this.dataToBase64(fetchOptions.body)
-      fetchOptions.body = SnappyJS.compress(new TextEncoder().encode(encoded).buffer)
+      const encoded = Buffer.from(fetchOptions.body).toString("base64")
+      const encodedBuffer = new TextEncoder().encode(encoded).buffer
+      fetchOptions.body = SnappyJS.compress(encodedBuffer)
       fetchOptions.headers["Content-Type"] = "application/octet-stream"
     }
 
