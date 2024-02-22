@@ -5,7 +5,10 @@
     "sourceMap": true,
     "outDir": "./dist/esm",
     "noImplicitAny": true,
-    "declaration": true
+    "declaration": true,
+    "typeRoots": ["lib/typings.d.ts", "node_modules/@types"],
+    "strict": true,
+    "esModuleInterop": true
   },
   "include": ["./lib/**/*"],
   "exclude": ["./node_modules"]
