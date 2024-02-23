@@ -13,5 +13,4 @@ node_modules/
 Thumbs.db
 
 # Ignore type files and transpiled
-lib/**/*.d.ts
 dist/
