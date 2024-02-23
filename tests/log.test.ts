@@ -15,7 +15,7 @@ describe("LogFlake logs", () => {
     mockPost = jest.fn()
     // @ts-expect-error
     LogFlake.prototype.post = mockPost
-    logFlake = new LogFlake(APP_ID, null, SERVER)
+    logFlake = new LogFlake(APP_ID, SERVER)
   })
 
   afterEach(() => {
@@ -28,7 +28,9 @@ describe("LogFlake logs", () => {
 
     expect(mockPost).toHaveBeenCalledWith(Queue.LOGS, {
       content,
-      level: LogLevels.INFO,
+      level: LogLevels.DEBUG,
+      // @ts-expect-error
+      hostname: logFlake.hostname,
     })
   })
 
@@ -41,6 +43,8 @@ describe("LogFlake logs", () => {
 
     expect(mockPost).toHaveBeenCalledWith(Queue.LOGS, {
       content,
+      // @ts-expect-error
+      hostname: logFlake.hostname,
       ...options,
     })
   })
@@ -52,6 +56,8 @@ describe("LogFlake logs", () => {
     expect(mockPost).toHaveBeenCalledWith(Queue.LOGS, {
       content: error.stack,
       level: LogLevels.EXCEPTION,
+      // @ts-expect-error
+      hostname: logFlake.hostname,
       params: error,
     })
   })
@@ -67,6 +73,8 @@ describe("LogFlake logs", () => {
       content: error.stack,
       level: LogLevels.EXCEPTION,
       params: error,
+      // @ts-expect-error
+      hostname: logFlake.hostname,
       ...options,
     })
   })

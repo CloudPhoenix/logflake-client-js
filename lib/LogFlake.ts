@@ -1,5 +1,5 @@
 import { IBodyLog, IBodyPerformance, LogLevels, Queue } from "./types"
-import { wait } from "./utils"
+import { getCurrentDateTime, wait } from "./utils"
 import { Buffer } from "buffer"
 import { compress } from "snappyjs"
 import { hostname as getDefaultHostname } from "os-browserify"
@@ -7,22 +7,22 @@ import { hostname as getDefaultHostname } from "os-browserify"
 export class LogFlake {
   private readonly server: string
   private readonly appId: string | null
-  private readonly hostname: string | null
+  private readonly hostname: string | undefined | null
   private readonly enableCompression: boolean
 
-  constructor(appId: string, hostname: string | null = null, server: string | null = null, enableCompression: boolean = true) {
+  constructor(appId: string, server: string | null = null, options?: { hostname?: string; enableCompression?: boolean }) {
     if (appId === null || appId.length === 0) {
       throw new Error("App ID must not be empty")
     }
     this.appId = appId
     this.server = server || "https://app.logflake.io"
-    this.hostname = hostname || getDefaultHostname() || null
-    this.enableCompression = enableCompression
+    this.hostname = options?.hostname || getDefaultHostname()
+    this.enableCompression = options?.enableCompression || true
   }
 
   private async post<T>(queue: Queue, bodyObject: T) {
     let contentType = "application/json"
-    let body: BodyInit = JSON.stringify({ ...bodyObject, hostname: this.hostname })
+    let body: BodyInit = JSON.stringify({ ...bodyObject, datetime: getCurrentDateTime() })
     if (this.enableCompression) {
       const encoded = Buffer.from(body).toString("base64")
       const encodedBuffer = new TextEncoder().encode(encoded).buffer
@@ -60,7 +60,8 @@ export class LogFlake {
   public async sendLog(content: string, options?: Omit<IBodyLog, "content">) {
     return this.post<IBodyLog>(Queue.LOGS, {
       content,
-      level: LogLevels.INFO,
+      level: LogLevels.DEBUG,
+      hostname: this.hostname,
       ...options,
     })
   }
@@ -70,6 +71,7 @@ export class LogFlake {
       content: exception.stack ?? exception.message ?? "Unknown error",
       level: LogLevels.EXCEPTION,
       params: exception,
+      hostname: this.hostname,
       ...options,
     })
   }
@@ -78,12 +80,14 @@ export class LogFlake {
     return this.post<IBodyPerformance>(Queue.PERF, { label, duration })
   }
 
-  public measurePerformance(label: string) {
+  public measurePerformance(label: string): () => Promise<number> {
     const startTime = Date.now()
 
-    return new Promise((resolve) => {
-      const duration = Date.now() - startTime
-      this.sendPerformance(label, duration).then(() => resolve(duration))
-    })
+    return () => {
+      return new Promise((resolve) => {
+        const duration = Date.now() - startTime
+        this.sendPerformance(label, duration).then(() => resolve(duration))
+      })
+    }
   }
 }

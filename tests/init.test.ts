@@ -8,9 +8,7 @@ describe("initialize", () => {
   const SERVER = process.env.SERVER as string
 
   it("should initialize correctly", () => {
-    const logInstance = initialize(APP_ID, {
-      server: SERVER,
-    })
+    const logInstance = initialize(APP_ID, SERVER)
 
     expect(logInstance).toBeDefined()
     // @ts-expect-error

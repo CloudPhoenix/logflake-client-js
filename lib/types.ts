@@ -17,6 +17,7 @@ export interface IBodyLog {
   params?: object
   level: number
   content: string
+  hostname?: string | null
 }
 
 export interface IBodyPerformance {
