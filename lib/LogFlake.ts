@@ -1,4 +1,4 @@
-import { IBodyLog, IBodyPerformance, LogLevels, Queue } from "./types"
+import { IBodyLog, IBodyPerformance, IInitOptions, LogLevels, Queue } from "./types"
 import { getCurrentDateTime, wait } from "./utils"
 import { Buffer } from "buffer"
 import { compress } from "snappyjs"
@@ -9,8 +9,9 @@ export class LogFlake {
   private readonly appId: string | null
   private readonly hostname: string | undefined | null
   private readonly enableCompression: boolean
+  private readonly correlation: string | undefined
 
-  constructor(appId: string, server: string | null = null, options?: { hostname?: string; enableCompression?: boolean }) {
+  constructor(appId: string, server: string | null = null, options?: IInitOptions) {
     if (appId === null || appId.length === 0) {
       throw new Error("App ID must not be empty")
     }
@@ -18,6 +19,7 @@ export class LogFlake {
     this.server = server || "https://app.logflake.io"
     this.hostname = options?.hostname || getDefaultHostname()
     this.enableCompression = options?.enableCompression || true
+    this.correlation = options?.correlation
   }
 
   private async post<T>(queue: Queue, bodyObject: T) {
@@ -57,28 +59,34 @@ export class LogFlake {
     }
   }
 
-  public async sendLog(content: string, options?: Omit<IBodyLog, "content">) {
+  private log(content: string, options?: Partial<IBodyLog>) {
     return this.post<IBodyLog>(Queue.LOGS, {
-      content,
       level: LogLevels.DEBUG,
-      hostname: this.hostname,
+      correlation: this.correlation,
       ...options,
+      content,
+      hostname: this.hostname,
     })
   }
 
-  public async sendException<E extends Error>(exception: E, options?: Pick<IBodyLog, "correlation">) {
-    const { stack, message, ...params } = exception
+  public sendLog(content: string, options?: Partial<Omit<IBodyLog, "content">>) {
+    return this.log(content, options)
+  }
 
-    return this.post<IBodyLog>(Queue.LOGS, {
-      content: stack ?? message ?? "Unknown error",
+  public sendException<E extends Error>(exception: E, options?: Omit<IBodyLog, "content" | "level">) {
+    const { stack, message, ...exceptionParams } = exception
+
+    return this.log(stack ?? message ?? "Unknown error", {
+      ...options,
       level: LogLevels.EXCEPTION,
-      params,
-      hostname: this.hostname,
-      ...options,
+      params: {
+        exception: exceptionParams,
+        meta: options?.params,
+      },
     })
   }
 
-  public async sendPerformance(label: string, duration: number) {
+  public sendPerformance(label: string, duration: number) {
     return this.post<IBodyPerformance>(Queue.PERF, { label, duration })
   }
 

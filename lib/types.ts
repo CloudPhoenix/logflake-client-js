@@ -14,8 +14,8 @@ export enum Queue {
 
 export interface IBodyLog {
   correlation?: string
-  params?: object
-  level: number
+  params?: Record<string, unknown>
+  level: LogLevels
   content: string
   hostname?: string | null
 }
@@ -23,4 +23,10 @@ export interface IBodyLog {
 export interface IBodyPerformance {
   label: string
   duration: number
+}
+
+export interface IInitOptions {
+  hostname?: string
+  enableCompression?: boolean
+  correlation?: string
 }
