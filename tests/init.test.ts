@@ -1,4 +1,4 @@
-import { Logger, initialize } from "../lib/init"
+import { getLogger, initialize } from "../lib/init"
 
 describe("initialize", () => {
   expect(process.env.APP_ID).toBeDefined()
@@ -15,6 +15,6 @@ describe("initialize", () => {
     expect(logInstance?.appId).toBe(APP_ID)
     // @ts-expect-error
     expect(logInstance?.server).toBe(SERVER)
-    expect(Logger).toBe(logInstance)
+    expect(getLogger()).toBe(logInstance)
   })
 })

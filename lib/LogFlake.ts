@@ -67,10 +67,12 @@ export class LogFlake {
   }
 
   public async sendException<E extends Error>(exception: E, options?: Pick<IBodyLog, "correlation">) {
+    const { stack, message, ...params } = exception
+
     return this.post<IBodyLog>(Queue.LOGS, {
-      content: exception.stack ?? exception.message ?? "Unknown error",
+      content: stack ?? message ?? "Unknown error",
       level: LogLevels.EXCEPTION,
-      params: exception,
+      params,
       hostname: this.hostname,
       ...options,
     })

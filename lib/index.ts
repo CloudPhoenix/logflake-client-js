@@ -1,4 +1,4 @@
 import "whatwg-fetch"
 
-export * from "./LogFlake"
+export { LogFlake } from "./LogFlake"
 export * from "./init"
