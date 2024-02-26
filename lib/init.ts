@@ -1,19 +1,14 @@
 import { LogFlake } from "./LogFlake"
-import { IBodyLog } from "./types"
+import { IBodyLog, IInitOptions } from "./types"
 
 let Logger: LogFlake | null = null
-
-interface IInitOptions {
-  hostname?: string
-  enableCompression?: boolean
-}
 
 export const getLogger = () => {
   return Logger
 }
 
-export const sendLog = (content: string, options?: Omit<IBodyLog, "content">) => getLogger()?.sendLog(content, options)
-export const sendException = (error: Error, options?: Pick<IBodyLog, "correlation">) => getLogger()?.sendException(error, options)
+export const sendLog = (content: string, options?: Partial<Omit<IBodyLog, "content">>) => getLogger()?.sendLog(content, options)
+export const sendException = (error: Error, options?: Omit<IBodyLog, "content" | "level">) => getLogger()?.sendException(error, options)
 export const measurePerformance = (label: string) => getLogger()?.measurePerformance(label)
 export const sendPerformance = (label: string, duration: number) => getLogger()?.sendPerformance(label, duration)
 

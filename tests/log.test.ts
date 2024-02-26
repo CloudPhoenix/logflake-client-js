@@ -53,12 +53,15 @@ describe("LogFlake logs", () => {
     const error = new Error("Test error")
     await logFlake.sendException(error)
 
+    const { message, stack, ...exception } = error
     expect(mockPost).toHaveBeenCalledWith(Queue.LOGS, {
-      content: error.stack,
+      content: stack || message || "Unknown error",
       level: LogLevels.EXCEPTION,
       // @ts-expect-error
       hostname: logFlake.hostname,
-      params: error,
+      params: {
+        exception,
+      },
     })
   })
 
@@ -69,10 +72,13 @@ describe("LogFlake logs", () => {
     }
     await logFlake.sendException(error, options)
 
+    const { message, stack, ...exception } = error
     expect(mockPost).toHaveBeenCalledWith(Queue.LOGS, {
-      content: error.stack,
+      content: stack || message || "Unknown error",
       level: LogLevels.EXCEPTION,
-      params: error,
+      params: {
+        exception,
+      },
       // @ts-expect-error
       hostname: logFlake.hostname,
       ...options,
