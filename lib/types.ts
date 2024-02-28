@@ -30,3 +30,6 @@ export interface IInitOptions {
   enableCompression?: boolean
   correlation?: string
 }
+
+export type SendLogOptionsType = Partial<Omit<IBodyLog, "content">>
+export type SendExceptionOptionsType = Omit<IBodyLog, "content" | "level">

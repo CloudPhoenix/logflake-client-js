@@ -1,5 +1,5 @@
 import { LogFlake } from "./LogFlake"
-import { IBodyLog, IInitOptions } from "./types"
+import { IInitOptions, SendExceptionOptionsType, SendLogOptionsType } from "./types"
 
 let Logger: LogFlake | null = null
 
@@ -7,8 +7,8 @@ export const getLogger = () => {
   return Logger
 }
 
-export const sendLog = (content: string, options?: Partial<Omit<IBodyLog, "content">>) => getLogger()?.sendLog(content, options)
-export const sendException = (error: Error, options?: Omit<IBodyLog, "content" | "level">) => getLogger()?.sendException(error, options)
+export const sendLog = (content: string, options?: SendLogOptionsType) => getLogger()?.sendLog(content, options)
+export const sendException = (error: Error, options?: SendExceptionOptionsType) => getLogger()?.sendException(error, options)
 export const measurePerformance = (label: string) => getLogger()?.measurePerformance(label)
 export const sendPerformance = (label: string, duration: number) => getLogger()?.sendPerformance(label, duration)
 

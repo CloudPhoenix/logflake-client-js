@@ -1,4 +1,4 @@
-import { IBodyLog, IBodyPerformance, IInitOptions, LogLevels, Queue } from "./types"
+import { IBodyLog, IBodyPerformance, IInitOptions, SendExceptionOptionsType, SendLogOptionsType, LogLevels, Queue } from "./types"
 import { getCurrentDateTime, wait } from "./utils"
 import { Buffer } from "buffer"
 import { compress } from "snappyjs"
@@ -69,11 +69,11 @@ export class LogFlake {
     })
   }
 
-  public sendLog(content: string, options?: Partial<Omit<IBodyLog, "content">>) {
+  public sendLog(content: string, options?: SendLogOptionsType) {
     return this.log(content, options)
   }
 
-  public sendException<E extends Error>(exception: E, options?: Omit<IBodyLog, "content" | "level">) {
+  public sendException<E extends Error>(exception: E, options?: SendExceptionOptionsType) {
     const { stack, message, ...exceptionParams } = exception
 
     return this.log(stack ?? message ?? "Unknown error", {
