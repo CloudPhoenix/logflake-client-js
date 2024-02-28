@@ -9,7 +9,7 @@ export class LogFlake {
   private readonly appId: string | null
   private readonly hostname: string | undefined | null
   private readonly enableCompression: boolean
-  private readonly correlation: string | undefined
+  private correlation: string | undefined
 
   constructor(appId: string, server: string | null = null, options?: IInitOptions) {
     if (appId === null || appId.length === 0) {
@@ -20,6 +20,10 @@ export class LogFlake {
     this.hostname = options?.hostname || getDefaultHostname()
     this.enableCompression = options?.enableCompression || true
     this.correlation = options?.correlation
+  }
+
+  public setCorrelation(correlation: string) {
+    this.correlation = correlation
   }
 
   private async post<T>(queue: Queue, bodyObject: T) {
