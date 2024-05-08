@@ -1,4 +1,13 @@
-import { IBodyLog, IBodyPerformance, IInitOptions, SendExceptionOptionsType, SendLogOptionsType, LogLevels, Queue } from "./types"
+import {
+  IBodyLog,
+  IBodyPerformance,
+  IInitOptions,
+  SendExceptionOptionsType,
+  SendLogOptionsType,
+  LogLevels,
+  Queue,
+  ICorrelation,
+} from "./types"
 import { getCurrentDateTime, wait } from "./utils"
 import { Buffer } from "buffer"
 import { compress } from "snappyjs"
@@ -9,7 +18,7 @@ export class LogFlake {
   private readonly appId: string | null
   private readonly hostname: string | undefined | null
   private readonly enableCompression: boolean
-  private correlation: string | undefined
+  private correlation: ICorrelation
 
   constructor(appId: string, server: string | null = null, options?: IInitOptions) {
     if (appId === null || appId.length === 0) {
@@ -22,7 +31,7 @@ export class LogFlake {
     this.correlation = options?.correlation
   }
 
-  public setCorrelation(correlation: string) {
+  public setCorrelation(correlation: ICorrelation) {
     this.correlation = correlation
   }
 
@@ -64,10 +73,17 @@ export class LogFlake {
   }
 
   private log(content: string, options?: Partial<IBodyLog>) {
+    let correlation: string | undefined
+    if (options?.correlation) {
+      correlation = typeof options.correlation === "function" ? options.correlation() : options.correlation
+    } else {
+      correlation = typeof this.correlation === "function" ? this.correlation() : this.correlation
+    }
+
     return this.post<IBodyLog>(Queue.LOGS, {
       level: LogLevels.DEBUG,
-      correlation: this.correlation,
       ...options,
+      correlation,
       content,
       hostname: this.hostname,
     })
