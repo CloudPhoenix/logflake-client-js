@@ -12,8 +12,10 @@ export enum Queue {
   PERF = "perf",
 }
 
+export type ICorrelation = string | (() => string) | undefined
+
 export interface IBodyLog {
-  correlation?: string
+  correlation?: ICorrelation
   params?: Record<string, unknown>
   level: LogLevels
   content: string
@@ -28,5 +30,8 @@ export interface IBodyPerformance {
 export interface IInitOptions {
   hostname?: string
   enableCompression?: boolean
-  correlation?: string
+  correlation?: ICorrelation
 }
+
+export type SendLogOptionsType = Partial<Omit<IBodyLog, "content">>
+export type SendExceptionOptionsType = Omit<IBodyLog, "content" | "level">
