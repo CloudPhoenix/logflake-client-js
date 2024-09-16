@@ -63,7 +63,7 @@ export class LogFlake {
           const textResponse = await response.text()
           console.error(`LogFlake Error: ${response.status} ${response.statusText}`)
           console.error(`LogFlake Error Text: ${textResponse}`)
-          console.error(`LogFlake Error Body object: ${bodyObject}`)
+          console.error(`LogFlake Error Body object: ${JSON.stringify(bodyObject)}`)
           continue
         }
 
