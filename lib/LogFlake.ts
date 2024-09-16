@@ -60,7 +60,10 @@ export class LogFlake {
       try {
         const response = await fetch(`${this.server}/api/ingestion/${this.appId}/${queue}`, fetchOptions)
         if (!response.ok) {
+          const textResponse = await response.text()
           console.error(`LogFlake Error: ${response.status} ${response.statusText}`)
+          console.error(`LogFlake Error Text: ${textResponse}`)
+          console.error(`LogFlake Error Body object: ${bodyObject}`)
           continue
         }
 
