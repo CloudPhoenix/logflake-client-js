@@ -18,6 +18,7 @@ export class LogFlake {
   private readonly appId: string | null
   private readonly hostname: string | undefined | null
   private readonly enableCompression: boolean
+  private verbose: boolean
   private correlation: ICorrelation
 
   constructor(appId: string, server: string | null = null, options?: IInitOptions) {
@@ -29,10 +30,15 @@ export class LogFlake {
     this.hostname = options?.hostname || getDefaultHostname()
     this.enableCompression = options?.enableCompression || true
     this.correlation = options?.correlation
+    this.verbose = options?.verbose || true
   }
 
   public setCorrelation(correlation: ICorrelation) {
     this.correlation = correlation
+  }
+
+  public setVerbose(verbose: boolean) {
+    this.verbose = verbose
   }
 
   private async post<T>(queue: Queue, bodyObject: T) {
@@ -61,15 +67,17 @@ export class LogFlake {
         const response = await fetch(`${this.server}/api/ingestion/${this.appId}/${queue}`, fetchOptions)
         if (!response.ok) {
           const textResponse = await response.text()
-          console.error(`LogFlake Error: ${response.status} ${response.statusText}`)
-          console.error(`LogFlake Error Text: ${textResponse}`)
-          console.error(`LogFlake Error Body object: ${JSON.stringify(bodyObject)}`)
+          if (this.verbose) {
+            console.error(`LogFlake Error: ${response.status} ${response.statusText}`)
+            console.error(`LogFlake Error Text: ${textResponse}`)
+            console.error(`LogFlake Error Body object: ${JSON.stringify(bodyObject)}`)
+          }
           continue
         }
 
         return response
       } catch (err) {
-        console.error(`LogFlake Error (retry ${i + 1}/${retries}):`, err)
+        if (this.verbose) console.error(`LogFlake Error (retry ${i + 1}/${retries}):`, err)
         await wait(500 * (i + 1))
       }
     }

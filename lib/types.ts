@@ -31,6 +31,7 @@ export interface IInitOptions {
   hostname?: string
   enableCompression?: boolean
   correlation?: ICorrelation
+  verbose?: boolean
 }
 
 export type SendLogOptionsType = Partial<Omit<IBodyLog, "content">>
